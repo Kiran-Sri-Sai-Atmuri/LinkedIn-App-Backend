@@ -12,4 +12,6 @@ public interface ConnectionRepository extends JpaRepository<Connection,String> {
     boolean existsByRequesterIdAndReceiverId(String requesterUserId, String receiverId);
 
     List<Connection> findByRequesterIdAndStatus(String requesterId, ConnectionStatus status);
+
+    List<Connection> findByReceiverIdAndStatus(String receiverId, ConnectionStatus status);
 }

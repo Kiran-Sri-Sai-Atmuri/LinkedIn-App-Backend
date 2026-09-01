@@ -157,4 +157,9 @@ public class UserService {
 
         return mapToResponse(savedUser);
     }
+
+    public List<Connection> getPendingConnections(String userId) {
+
+        return connectionRepository.findByReceiverIdAndStatus(userId,ConnectionStatus.PENDING);
+    }
 }
