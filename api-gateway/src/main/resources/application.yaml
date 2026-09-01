@@ -1,0 +1,49 @@
+spring:
+  application:
+    name: api-gateway
+  data:
+    redis:
+      host: localhost
+      port: 6379
+  cloud:
+    gateway:
+      server:
+        webflux:
+          routes:
+            - id: user-service-auth
+              uri: http://localhost:8081
+              predicates:
+                - Path=/api/v1/auth/**
+            - id: user-service
+              uri: http://localhost:8081
+              predicates:
+                - Path=/api/v1/users/**
+              filters:
+                - name: JwtAuthFilter
+            - id: post-service
+              uri: http://localhost:8082
+              predicates:
+                - Path=/api/v1/posts/**
+              filters:
+                - name: JwtAuthFilter
+            - id: feed-service
+              uri: http://localhost:8083
+              predicates:
+                - Path=/api/v1/feed/**
+              filters:
+                - name: JwtAuthFilter
+            - id: search-service
+              uri: http://localhost:8084
+              predicates:
+                - Path=/api/v1/search/**
+              filters:
+                - name: JwtAuthFilter
+server:
+  port: 8080
+jwt:
+  secret-key: ${JWT_SECRET}
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
