@@ -19,6 +19,17 @@ spring:
             value:
               default:
                 type: java.util.HashMap
+  mail:
+    host: smtp.mail.com
+    port: 587
+    username: ${SMTP_USERNAME}
+    password: ${SMTP_PASSWORD}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enabled: true
 
 server:
   port: 8085

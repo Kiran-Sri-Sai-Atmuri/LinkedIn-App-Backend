@@ -66,6 +66,7 @@ public class AuthService {
 
         Map<String,Object> userCreatedEvent = new HashMap<>();
         userCreatedEvent.put("userId",savedUser.getId());
+        userCreatedEvent.put("email",savedUser.getEmail());
         userCreatedEvent.put("firstName",savedUser.getFirstName());
         userCreatedEvent.put("lastName",savedUser.getLastName());
         userCreatedEvent.put("headline",savedUser.getHeadline());

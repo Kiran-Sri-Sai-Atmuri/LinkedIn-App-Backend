@@ -86,6 +86,10 @@ public class UserService {
     }
 
     public String sendConnectionRequest(String receiverId, String requesterId) {
+
+        User receiver = userRepository.findById(receiverId)
+                .orElseThrow(() -> new RuntimeException("User not found: "+receiverId));
+
         if(connectionRepository.existsByRequesterIdAndReceiverId(
                 requesterId,
                 receiverId
@@ -108,6 +112,8 @@ public class UserService {
         Map<String,Object> connectionRequestedEvent = new HashMap<>();
         connectionRequestedEvent.put("requesterId",requesterId);
         connectionRequestedEvent.put("receiverId",receiverId);
+        connectionRequestedEvent.put("receiverEmail",receiver.getEmail());
+
 
         kafkaTemplate.send(CONNECTION_REQUESTED_TOPIC,requesterId,connectionRequestedEvent);
 
@@ -121,15 +127,19 @@ public class UserService {
                 orElseThrow(() -> new RuntimeException(
                         "Connection not found: "+connectionId
                 ));
+        User requester = userRepository.findById(connection.getRequesterId())
+                .orElseThrow(() -> new RuntimeException("User not found: "+connection.getRequesterId()));
+
         connection.setStatus(ConnectionStatus.CONNECTED);
         connectionRepository.save(connection);
 
         //Publish connection.accepted event
-        Map<String,Object> connectionAcceptededEvent = new HashMap<>();
-        connectionAcceptededEvent.put("requesterId",connection.getRequesterId());
-        connectionAcceptededEvent.put("receiverId",connection.getReceiverId());
+        Map<String,Object> connectionAcceptedEvent = new HashMap<>();
+        connectionAcceptedEvent.put("requesterId",connection.getRequesterId());
+        connectionAcceptedEvent.put("receiverId",connection.getReceiverId());
+        connectionAcceptedEvent.put("requesterEmail",requester.getEmail());
 
-        kafkaTemplate.send(CONNECTION_ACCEPTED_TOPIC,connection.getRequesterId(),connectionAcceptededEvent);
+        kafkaTemplate.send(CONNECTION_ACCEPTED_TOPIC,connection.getRequesterId(), connectionAcceptedEvent);
 
         log.info("connection accepted: {}",connectionId);
         return "Connection accepted";

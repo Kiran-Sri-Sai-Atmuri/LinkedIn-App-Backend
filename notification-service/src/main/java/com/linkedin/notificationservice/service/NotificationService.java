@@ -1,7 +1,10 @@
 package com.linkedin.notificationservice.service;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.annotation.KafkaListener;
+import org.springframework.mail.SimpleMailMessage;
+import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.stereotype.Service;
 
@@ -9,8 +12,10 @@ import java.util.Map;
 
 @Service
 @Slf4j
+@RequiredArgsConstructor
 public class NotificationService {
 
+    private final JavaMailSender javaMailSender;
 
     /**
      * consume user.created event
@@ -21,10 +26,10 @@ public class NotificationService {
             @Payload Map<String,Object> payload
     ){
         try{
-            String userId = (String)payload.get("userId");
+            String email = (String)payload.get("email");
             String firstName = (String)payload.get("firstName");
 
-            sendNotification(userId,
+            sendNotification(email,
                     "Welcome to LinkedIn",
                     String.format(
                             "Welcome %s your account ahs been created"+
@@ -44,7 +49,8 @@ public class NotificationService {
 
             String receiverId = (String)payload.get("receiverId");
             String requesterId = (String)payload.get("requesterId");
-            sendNotification(receiverId,
+            String receiverEmail = (String)payload.get("receiverEmail");
+            sendNotification(receiverEmail,
                     "New connection request",
                     String.format(
                             "User %s want to connect with you",
@@ -63,7 +69,8 @@ public class NotificationService {
         try{
             String receiverId = (String)payload.get("receiverId");
             String requesterId = (String)payload.get("requesterId");
-            sendNotification(requesterId,
+            String requesterEmail = (String)payload.get("requesterEmail");
+            sendNotification(requesterEmail,
                     "Connection Accepted",
                     String.format(
                             "User %s Accepted your connection request"+
@@ -118,14 +125,20 @@ public class NotificationService {
         }
     }
 
-    private void sendNotification(String userId,String title, String message) {
+    private void sendNotification(String email,String title, String message) {
 
-        log.info("---------------------------------------");
-        log.info("NOTIFICATION SENT");
-        log.info("To user: {}",userId);
-        log.info("Title: {}",title);
-        log.info("message: {}",message);
-        log.info("--------------------------");
+//        log.info("---------------------------------------");
+//        log.info("NOTIFICATION SENT");
+//        log.info("To user: {}",email);
+//        log.info("Title: {}",title);
+//        log.info("message: {}",message);
+//        log.info("--------------------------");
+
+        SimpleMailMessage mailMessage = new SimpleMailMessage();
+        mailMessage.setTo(email);
+        mailMessage.setSubject(title);
+        mailMessage.setText(message);
+
 
     }
 
